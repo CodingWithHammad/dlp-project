@@ -1,6 +1,8 @@
 import express from "express"
 import dotenv from "dotenv"
 
+import authRoutes from "./routes/authRoutes.js"
+
 import { connectDB } from "./config/db.js"
 
 
@@ -10,6 +12,9 @@ const app = express()
 
 
 app.get('/', (_, res) => { res.send('Server is running correctly...') })
+
+// Routes
+app.use("/api/auth", authRoutes);
 
 
 connectDB();

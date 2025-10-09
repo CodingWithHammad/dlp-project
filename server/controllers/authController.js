@@ -1,7 +1,7 @@
 import { User } from "../models/User.model.js"
 import nodemailer from "nodemailer"
 import bcrypt from "bcryptjs"
-import generateToken from "../utlis/generateToken.js"
+import { generateToken } from "../utlis/generateToken.js"
 
 const transporter = nodemailer.createTransport(
     {
@@ -86,8 +86,8 @@ export const forgetPassword = async (req, res) => {
         if (!user) res.status(400).json({ message: "User is not found..." })
 
         const otp = Math.floor(100000 + Math.random() * 90000).toString()
-        user?.otp = otp
-        user?.otpExpiry = Date.now() + 10 * 60 * 1000;
+        user.otp = otp
+        user.otpExpiry = Date.now() + 10 * 60 * 1000;
         await user.save();
 
         await transporter.sendMail({
@@ -111,6 +111,38 @@ export const forgetPassword = async (req, res) => {
         console.log("Error present inside the forget password controller : " + error);
         res.status(500).json({
             message: "Error present inside the forget password controller",
+            error
+        })
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user || !user?.otp == otp) return console.log("Invalid OTP...");
+        if (user?.otpExpiry < new Date) return console.log("OTP expired...");
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.otp = null;
+        user.otpExpiry = null;
+        await user.save();
+
+        console.log({
+            message: `Password successfully updated for username : ${user?.name} \n Updated password is : ${hashedPassword}`,
+            user
+        })
+
+        res.status(200).json({
+            message: `Password successfully updated for username : ${user?.name} \n Updated password is : ${hashedPassword}`,
+            user
+        })
+    } catch (error) {
+        console.log("Error present in resetPassword controller." + error.message);
+        res.status(500).json({
+            message: "Error present in resetPassword controller",
             error
         })
     }
