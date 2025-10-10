@@ -6,8 +6,8 @@ export const protect = async (req, res, next) => {
     try {
         if (req.headers.authorization && req.headers.authorization.StartsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
-            const decode = jwt.verify(token, process.env.JWT_SECRET)
-            req.user = await User.findById(decode.id).select("-password")
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await User.findById(decode.id).select("-password");
             if (!req.user) return req.status(401).json({ message: "User not found..." });
             next();
         } else {
