@@ -15,16 +15,15 @@ const transporter = nodemailer.createTransport(
 
 export const register = async (req, res) => {
     try {
-
         const { name, email, password, role } = req.body;
         const user = await User.findOne({ email });
         if (user) console.log("User already exist...")
 
         const newUser = User.create({
-            name: name,
-            password: password,
-            email: email,
-            role: role
+            name,
+            email,
+            password,
+            role
         })
 
         console.log({

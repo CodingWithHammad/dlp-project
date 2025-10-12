@@ -9,6 +9,7 @@ import { connectDB } from "./config/db.js"
 dotenv.config()
 
 const app = express()
+app.use(express.json());
 
 
 app.get('/', (_, res) => { res.send('Server is running correctly...') })
