@@ -2,6 +2,10 @@ import { User } from "../models/User.model.js"
 import nodemailer from "nodemailer"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../utlis/generateToken.js"
+import dotenv from "dotenv"
+
+dotenv.config()
+
 
 const transporter = nodemailer.createTransport(
     {
@@ -72,7 +76,7 @@ export const login = async (req, res) => {
         console.log("Error present inside the login controller : " + error);
         res.status(500).json({
             message: "Error present inside the login controller",
-            error
+            status: 500
         })
     }
 }
@@ -116,33 +120,44 @@ export const forgetPassword = async (req, res) => {
 }
 
 export const resetPassword = async (req, res) => {
-    try {
-        const { email, otp, newPassword } = req.body;
-        const user = await User.findOne({ email });
+  try {
+    const { email, otp, newPassword } = req.body;
 
-        if (!user || !user?.otp == otp) return console.log("Invalid OTP...");
-        if (user?.otpExpiry < new Date) return console.log("OTP expired...");
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-        user.otp = null;
-        user.otpExpiry = null;
-        await user.save();
-
-        console.log({
-            message: `Password successfully updated for username : ${user?.name} \n Updated password is : ${hashedPassword}`,
-            user
-        })
-
-        res.status(200).json({
-            message: `Password successfully updated for username : ${user?.name} \n Updated password is : ${hashedPassword}`,
-            user
-        })
-    } catch (error) {
-        console.log("Error present in resetPassword controller." + error.message);
-        res.status(500).json({
-            message: "Error present in resetPassword controller",
-            error
-        })
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "Please provide all fields." });
     }
-}
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP." });
+    }
+    if (user.otpExpiry < new Date()) {
+      return res.status(400).json({ message: "OTP expired." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.otp = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    console.log(`✅ Password reset successful for ${user.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: `Password successfully updated for user: ${user.name}`,
+    });
+  } catch (error) {
+    console.error("❌ Error in resetPassword controller:", error.message);
+    res.status(500).json({
+      message: "Error in resetPassword controller",
+      error: error.message,
+    });
+  }
+};
