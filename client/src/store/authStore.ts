@@ -1,0 +1,69 @@
+import { create } from "zustand";
+import { registerUser, loginUser, forgetPassword, resetPassword } from "../services/authService";
+import type { AuthState, RegisterData, LoginData, ForgetPasswordData, ResetPasswordData } from "@/types/auth";
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  token: null,
+  loading: false,
+  error: null,
+
+  register: async (data: RegisterData) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await registerUser(data);
+      set({ user: res.user, token: res.token, loading: false });
+      // success handled via state
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || err.message,
+        loading: false,
+      });
+      // failure handled via state
+    }
+  },
+
+  login: async (data: LoginData) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await loginUser(data);
+      set({ user: res.user, token: res.token, loading: false });
+      localStorage.setItem("token", res.token);
+      // success handled via state
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || err.message,
+        loading: false,
+      });
+      // failure handled via state
+    }
+  },
+
+  forgetPassword: async (data: ForgetPasswordData) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await forgetPassword(data);
+      set({ loading: false });
+      return res;
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || err.message,
+        loading: false,
+      });
+    }
+  },
+
+  resetPassword: async (data: ResetPasswordData) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await resetPassword(data);
+      set({ loading: false });
+      return res;
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || err.message,
+        loading: false,
+      });
+    }
+  },
+}));
