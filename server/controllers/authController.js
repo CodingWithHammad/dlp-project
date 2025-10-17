@@ -120,44 +120,68 @@ export const forgetPassword = async (req, res) => {
 }
 
 export const resetPassword = async (req, res) => {
-  try {
-    const { email, otp, newPassword } = req.body;
+    try {
+        const { email, otp, newPassword } = req.body;
 
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ message: "Please provide all fields." });
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: "Please provide all fields." });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        if (user.otp !== otp) {
+            return res.status(400).json({ message: "Invalid OTP." });
+        }
+        if (user.otpExpiry < new Date()) {
+            return res.status(400).json({ message: "OTP expired." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        user.otp = null;
+        user.otpExpiry = null;
+
+        await user.save();
+
+        console.log(`✅ Password reset successful for ${user.email}`);
+
+        res.status(200).json({
+            success: true,
+            message: `Password successfully updated for user: ${user.name}`,
+        });
+    } catch (error) {
+        console.error("❌ Error in resetPassword controller:", error.message);
+        res.status(500).json({
+            message: "Error in resetPassword controller",
+            error: error.message,
+        });
     }
+};
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        console.log(`👋 ${req.user?.name || "User"} logged out successfully.`);
+
+        res.status(200).json({
+            success: true,
+            message: "User logged out successfully.",
+        });
+    } catch (error) {
+        console.error("❌ Error in logout controller:", error.message);
+        res.status(500).json({
+            message: "Error in logout controller",
+            error: error.message,
+        });
     }
-
-    if (user.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP." });
-    }
-    if (user.otpExpiry < new Date()) {
-      return res.status(400).json({ message: "OTP expired." });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    user.password = hashedPassword;
-    user.otp = null;
-    user.otpExpiry = null;
-
-    await user.save();
-
-    console.log(`✅ Password reset successful for ${user.email}`);
-
-    res.status(200).json({
-      success: true,
-      message: `Password successfully updated for user: ${user.name}`,
-    });
-  } catch (error) {
-    console.error("❌ Error in resetPassword controller:", error.message);
-    res.status(500).json({
-      message: "Error in resetPassword controller",
-      error: error.message,
-    });
-  }
 };

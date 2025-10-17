@@ -1,47 +1,3 @@
-// import { useState } from "react";
-// import { Button } from "../ui/button"; 
-// import { Input } from "../ui/input"; 
-// import { useAuthStore } from "@/store/authStore";
-
-// const LoginForm = () => {
-//     const { login, loading, error } = useAuthStore();
-//     const [form, setForm] = useState({ email: "", password: "" });
-
-//     const handleSubmit = async (e : any) => {
-//         e.preventDefault();
-//         await login(form);
-//     };
-
-//     return (
-//         <div className="max-w-md mx-auto mt-10 p-6 rounded-2xl shadow-md border">
-//             <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
-//             <form onSubmit={handleSubmit} className="space-y-4">
-//                 <Input
-//                     type="email"
-//                     placeholder="Email"
-//                     value={form.email}
-//                     onChange={(e : any) => setForm({ ...form, email: e.target.value })}
-//                     required
-//                 />
-//                 <Input
-//                     type="password"
-//                     placeholder="Password"
-//                     value={form.password}
-//                     onChange={(e : any) => setForm({ ...form, password: e.target.value })}
-//                     required
-//                 />
-//                 <Button type="submit" className="w-full" disabled={loading}>
-//                     {loading ? "Logging in..." : "Login"}
-//                 </Button>
-//             </form>
-//             {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
-//         </div>
-//     );
-// };
-
-// export default LoginForm;
-
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
@@ -55,11 +11,13 @@ const LoginForm = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await login(form);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const success = await login(form);
+  if (success) {
     navigate("/");
-  };
+  }
+};
 
   return (
     <div className="w-full max-w-md px-4">

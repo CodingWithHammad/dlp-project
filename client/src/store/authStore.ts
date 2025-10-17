@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { registerUser, loginUser, forgetPassword, resetPassword } from "../services/authService";
+import { registerUser, loginUser, forgetPassword, resetPassword, logoutUser } from "../services/authService";
 import type { AuthState, RegisterData, LoginData, ForgetPasswordData, ResetPasswordData } from "@/types/auth";
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -29,15 +29,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await loginUser(data);
       set({ user: res.user, token: res.token, loading: false });
       localStorage.setItem("token", res.token);
-      // success handled via state
+      return true;
     } catch (err: any) {
       set({
         error: err.response?.data?.message || err.message,
         loading: false,
       });
-      // failure handled via state
+      return false;
     }
   },
+
 
   forgetPassword: async (data: ForgetPasswordData) => {
     try {
@@ -64,6 +65,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: err.response?.data?.message || err.message,
         loading: false,
       });
+    }
+  },
+
+  logout: async () => {
+    try {
+      await logoutUser();
+    } catch (err : any) {
+      console.warn("Logout API failed, clearing local anyway:", err.message);
+    } finally {
+      localStorage.removeItem("token");
+      set({ user: null, token: null });
     }
   },
 }));

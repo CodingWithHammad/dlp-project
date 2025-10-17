@@ -32,7 +32,8 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   register: (data: RegisterData) => Promise<void>;
-  login: (data: LoginData) => Promise<void>;
+  login: (data: LoginData) => Promise<boolean>;
+  logout: () => Promise<void>;
   forgetPassword: (data: ForgetPasswordData) => Promise<any>;
   resetPassword: (data: ResetPasswordData) => Promise<any>;
 }

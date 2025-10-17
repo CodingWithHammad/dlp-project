@@ -1,48 +1,4 @@
-// import { useState } from "react";
-// import { useAuthStore } from "../../store/authStore";
-// import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// const ResetPasswordForm = () => {
-//   const [formData, setFormData] = useState({ email: "", otp: "", newPassword: "" });
-//   const { resetPassword, loading, error } = useAuthStore();
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     await resetPassword(formData);
-//   };
-
-//   return (
-//     <Card className="w-[350px] mx-auto mt-20">
-//       <CardHeader>
-//         <CardTitle>Reset Password</CardTitle>
-//       </CardHeader>
-//       <CardContent>
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <Input name="email" placeholder="Email" onChange={handleChange} />
-//           <Input name="otp" placeholder="Enter OTP" onChange={handleChange} />
-//           <Input
-//             name="newPassword"
-//             type="password"
-//             placeholder="New Password"
-//             onChange={handleChange}
-//           />
-//           {error && <p className="text-red-500 text-sm">{error}</p>}
-//           <Button type="submit" disabled={loading} className="w-full">
-//             {loading ? "Updating..." : "Reset Password"}
-//           </Button>
-//         </form>
-//       </CardContent>
-//     </Card>
-//   );
-// };
-
-// export default ResetPasswordForm;
 
 
 
