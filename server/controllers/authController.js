@@ -17,39 +17,97 @@ const transporter = nodemailer.createTransport(
     }
 )
 
+// export const register = async (req, res) => {
+//     try {
+//         const { name, email, password, role } = req.body;
+//         const user = await User.findOne({ email });
+//         if (user) console.log("User already exist...")
+
+//         const newUser = User.create({
+//             name,
+//             email,
+//             password,
+//             role
+//         })
+
+//         console.log({
+//             message: "New user successfully created...",
+//             token: generateToken(user?._id),
+//             newUser
+//         })
+
+//         res.status(201).json({
+//             message: "New user successfully created...",
+//             token: generateToken(user?._id),
+//             newUser
+//         })
+
+//     } catch (error) {
+//         console.log("Error present inside the register controller, error is :" + error);
+//         res.status(500).json({
+//             message: "Error present inside the register controller ...",
+//             error
+//         })
+//     }
+// }
+
 export const register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
-        const user = await User.findOne({ email });
-        if (user) console.log("User already exist...")
+        const { name, email, password, role, image } = req.body;
 
-        const newUser = User.create({
+        // ✅ Validate required fields
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // ✅ Check if image is uploaded (either through req.file or body)
+        const imageUrl = req.file ? req.file.path : image;
+        if (!imageUrl) {
+            return res.status(400).json({ message: "Profile image is required" });
+        }
+
+        // ✅ Check existing user
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        // ✅ Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // ✅ Create new user
+        const newUser = await User.create({
             name,
             email,
-            password,
-            role
-        })
+            password: hashedPassword,
+            role,
+            profileImage: imageUrl,
+        });
 
-        console.log({
-            message: "New user successfully created...",
-            token: generateToken(user?._id),
-            newUser
-        })
+        // ✅ Generate token
+        const token = generateToken(newUser._id);
 
         res.status(201).json({
-            message: "New user successfully created...",
-            token: generateToken(user?._id),
-            newUser
-        })
-
+            message: "User registered successfully!",
+            user: {
+                _id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
+                profileImage: newUser.profileImage,
+            },
+            token,
+        });
     } catch (error) {
-        console.log("Error present inside the register controller, error is :" + error);
+        console.error("Error in register controller:", error);
         res.status(500).json({
-            message: "Error present inside the register controller ...",
-            error
-        })
+            message: "Error in register controller",
+            error: error.message,
+        });
     }
-}
+};
+
 
 export const login = async (req, res) => {
     try {
