@@ -3,6 +3,8 @@ import nodemailer from "nodemailer"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../utlis/generateToken.js"
 import dotenv from "dotenv"
+import cloudinary from "../config/cloudnary.js"
+import fs from "fs";
 
 dotenv.config()
 
@@ -17,97 +19,73 @@ const transporter = nodemailer.createTransport(
     }
 )
 
-// export const register = async (req, res) => {
-//     try {
-//         const { name, email, password, role } = req.body;
-//         const user = await User.findOne({ email });
-//         if (user) console.log("User already exist...")
-
-//         const newUser = User.create({
-//             name,
-//             email,
-//             password,
-//             role
-//         })
-
-//         console.log({
-//             message: "New user successfully created...",
-//             token: generateToken(user?._id),
-//             newUser
-//         })
-
-//         res.status(201).json({
-//             message: "New user successfully created...",
-//             token: generateToken(user?._id),
-//             newUser
-//         })
-
-//     } catch (error) {
-//         console.log("Error present inside the register controller, error is :" + error);
-//         res.status(500).json({
-//             message: "Error present inside the register controller ...",
-//             error
-//         })
-//     }
-// }
-
 export const register = async (req, res) => {
-    try {
-        const { name, email, password, role, image } = req.body;
+  try {
+    const { name, email, password, role } = req.body;
 
-        // ✅ Validate required fields
-        if (!name || !email || !password || !role) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
-
-        // ✅ Check if image is uploaded (either through req.file or body)
-        const imageUrl = req.file ? req.file.path : image;
-        if (!imageUrl) {
-            return res.status(400).json({ message: "Profile image is required" });
-        }
-
-        // ✅ Check existing user
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        // ✅ Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // ✅ Create new user
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            role,
-            profileImage: imageUrl,
-        });
-
-        // ✅ Generate token
-        const token = generateToken(newUser._id);
-
-        res.status(201).json({
-            message: "User registered successfully!",
-            user: {
-                _id: newUser._id,
-                name: newUser.name,
-                email: newUser.email,
-                role: newUser.role,
-                profileImage: newUser.profileImage,
-            },
-            token,
-        });
-    } catch (error) {
-        console.error("Error in register controller:", error);
-        res.status(500).json({
-            message: "Error in register controller",
-            error: error.message,
-        });
+    // ✅ Validate fields
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-};
 
+    // ✅ Check if image file exists
+    if (!req.file) {
+      return res.status(400).json({ message: "Profile image is required" });
+    }
+
+    // ✅ Check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // ✅ Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "dlp-users", // optional: creates a folder in Cloudinary
+      transformation: [{ width: 400, height: 400, crop: "fill" }],
+    });
+
+    // ✅ Remove local file after upload
+    fs.unlinkSync(req.file.path);
+
+    // ✅ Hash password securely
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // ✅ Create new user
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      profileImage: result.secure_url, // ✅ save Cloudinary URL
+    });
+
+    // ✅ Generate JWT token
+    const token = generateToken(newUser._id);
+
+    // ✅ Send success response
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully!",
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        profileImage: newUser.profileImage,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("❌ Error in register controller:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error in register controller",
+      error: error.message,
+    });
+  }
+};
 
 export const login = async (req, res) => {
     try {

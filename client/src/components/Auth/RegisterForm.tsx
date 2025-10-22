@@ -71,7 +71,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100 px-4">
+    <div className="flex justify-center items-center min-h-screen px-4">
       <Card className="w-full max-w-md shadow-xl rounded-2xl">
         <CardHeader className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-2 rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 shadow-lg">

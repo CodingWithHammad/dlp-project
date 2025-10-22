@@ -1,6 +1,6 @@
 import Router from "express"
 import { forgetPassword, login, logout, register, resetPassword } from "../controllers/authController.js";
-import upload from "../middlewares/multer.js";
+import { upload } from "../middlewares/multer.js";
 
 const router = Router();
 
