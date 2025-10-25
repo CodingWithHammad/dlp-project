@@ -9,7 +9,8 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-profileImage: File | undefined;
+  role: string;
+  profileImage: File | undefined;
 }
 
 export interface LoginData {

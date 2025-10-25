@@ -27,7 +27,7 @@ const UserSchema = new Schema(
         },
         profileImage: {
             type: String,
-            required: [true, "Profile image is required"],
+            required: [false, "Profile image is required"],
         },
         otp: {
             type: String,
