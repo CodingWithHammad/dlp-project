@@ -19,109 +19,11 @@ const transporter = nodemailer.createTransport(
     }
 )
 
-// export const register = async (req, res) => {
-//   try {
-//     const { name, email, password, role } = req.body;
-
-//     // ✅ Validate fields
-//     if (!name || !email || !password || !role) {
-//       return res.status(400).json({ message: "All fields are required" });
-//     }
-
-//     // ✅ Check if image file exists
-//     if (!req.file) {
-//       return res.status(400).json({ message: "Profile image is required" });
-//     }
-
-//     // ✅ Check existing user
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ message: "User already exists" });
-//     }
-
-//     // ✅ Upload image to Cloudinary
-//     const result = await cloudinary.uploader.upload(req.file.path, {
-//       folder: "dlp-users", // optional: creates a folder in Cloudinary
-//       transformation: [{ width: 400, height: 400, crop: "fill" }],
-//     });
-
-//     // ✅ Remove local file after upload
-//     fs.unlinkSync(req.file.path);
-
-//     // ✅ Hash password securely
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-
-//     // ✅ Create new user
-//     const newUser = await User.create({
-//       name,
-//       email,
-//       password: hashedPassword,
-//       role,
-//       profileImage: result.secure_url, // ✅ save Cloudinary URL
-//     });
-
-//     // ✅ Generate JWT token
-//     const token = generateToken(newUser._id);
-
-//     // ✅ Send success response
-//     res.status(201).json({
-//       success: true,
-//       message: "User registered successfully!",
-//       user: {
-//         _id: newUser._id,
-//         name: newUser.name,
-//         email: newUser.email,
-//         role: newUser.role,
-//         profileImage: newUser.profileImage,
-//       },
-//       token,
-//     });
-//   } catch (error) {
-//     console.error("❌ Error in register controller:", error.message);
-//     res.status(500).json({
-//       success: false,
-//       message: "Error in register controller",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// export const login = async (req, res) => {
-//     try {
-
-//         const { email, password } = req.body
-//         const user = await User.findOne({ email })
-//         if (!user) res.status(400).json({ message: "User is not found!..." })
-
-//         const isMatch = await user.matchPassword(password);
-//         if (!isMatch) console.log("Invalid credentials ...");
-
-//         console.log({
-//             message: `${user?.name} login successfully ...`,
-//             user
-//         })
-
-//         res.status(200).json({
-//             message: `${user?.name} login successfully ...`,
-//             token: generateToken(user?._id),
-//             user
-//         })
-
-//     } catch (error) {
-//         console.log("Error present inside the login controller : " + error);
-//         res.status(500).json({
-//             message: "Error present inside the login controller",
-//             status: 500
-//         })
-//     }
-// }
-
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // ✅ Basic validation
+    // ✅ Validate fields
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -131,53 +33,41 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "Profile image is required" });
     }
 
-    // ✅ Check if user already exists
+    // ✅ Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // ⚙️ Admin registration allowed only if matches predefined credentials
-    if (role === "admin") {
-      if (
-        email !== process.env.ADMIN_EMAIL ||
-        password !== process.env.ADMIN_PASSWORD
-      ) {
-        return res.status(403).json({
-          message:
-            "Invalid admin credentials. You are not authorized to register as admin.",
-        });
-      }
-    }
-
     // ✅ Upload image to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "dlp-users",
+      folder: "dlp-users", // optional: creates a folder in Cloudinary
       transformation: [{ width: 400, height: 400, crop: "fill" }],
     });
 
-    // ✅ Remove local file
+    // ✅ Remove local file after upload
     fs.unlinkSync(req.file.path);
 
     // ✅ Hash password securely
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ✅ Create user
+    // ✅ Create new user
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
-      profileImage: result.secure_url,
+      profileImage: result.secure_url, // ✅ save Cloudinary URL
     });
 
-    // ✅ Generate JWT
+    // ✅ Generate JWT token
     const token = generateToken(newUser._id);
 
+    // ✅ Send success response
     res.status(201).json({
       success: true,
-      message: `${role === "admin" ? "Admin" : "User"} registered successfully!`,
+      message: "User registered successfully!",
       user: {
         _id: newUser._id,
         name: newUser.name,
@@ -197,58 +87,35 @@ export const register = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
 
-        // 🧩 Handle Admin Login Separately
-        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const adminData = {
-                name: "Admin",
-                email: process.env.ADMIN_EMAIL,
-                role: "admin",
-            };
-
-            const token = generateToken("admin-secret-id"); // static id, just for JWT
-
-            return res.status(200).json({
-                success: true,
-                message: "Admin logged in successfully!",
-                user: adminData,
-                token,
-            });
-        }
-
-        // 🧩 Handle Normal User Login
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+        const { email, password } = req.body
+        const user = await User.findOne({ email })
+        if (!user) res.status(400).json({ message: "User is not found!..." })
 
         const isMatch = await user.matchPassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
+        if (!isMatch) console.log("Invalid credentials ...");
+
+        console.log({
+            message: `${user?.name} login successfully ...`,
+            user
+        })
 
         res.status(200).json({
-            success: true,
-            message: `${user.name} logged in successfully`,
-            token: generateToken(user._id),
-            user,
-        });
+            message: `${user?.name} login successfully ...`,
+            token: generateToken(user?._id),
+            user
+        })
+
     } catch (error) {
-        console.error("❌ Error inside login controller:", error.message);
+        console.log("Error present inside the login controller : " + error);
         res.status(500).json({
-            success: false,
-            message: "Error inside login controller",
-            error: error.message,
-        });
+            message: "Error present inside the login controller",
+            status: 500
+        })
     }
-};
-
-
-
+}
 
 export const forgetPassword = async (req, res) => {
     try {

@@ -8,9 +8,12 @@ export const registerUser = async (data: any) => {
 };
 
 export const loginUser = async (data: any) => {
-  const res = await api.post("/auth/login", data);
+  const res = await api.post("/auth/login", data, {
+    withCredentials: false, // ✅ ignore cookies on login
+  });
   return res.data;
 };
+
 
 export const forgetPassword = async (data: any) => {
   const res = await api.post("/auth/forgetPassword", data);
@@ -23,6 +26,6 @@ export const resetPassword = async (data: any) => {
 };
 
 export const logoutUser = async () => {
-  const res = await api.post("/api/auth/logout", {}, { withCredentials: true });
+  const res = await api.post("/auth/logout", {}, { withCredentials: true });
   return res.data;
 }

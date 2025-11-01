@@ -29,7 +29,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         <p className="text-gray-500">Sign in to continue to your account</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form className="space-y-5">
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <div className="relative">
@@ -88,7 +88,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading} onClick={handleSubmit}>
           {loading ? (
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

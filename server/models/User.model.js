@@ -27,7 +27,7 @@ const UserSchema = new Schema(
         },
         profileImage: {
             type: String,
-            required: [false, "Profile image is required"],
+            required: [true, "Profile image is required"],
         },
         otp: {
             type: String,
@@ -53,6 +53,7 @@ UserSchema.pre("save", async function (next) {
 
 // ✅ Compare entered password with stored one
 UserSchema.methods.matchPassword = async function (enteredPassword) {
+    console.log("Comparing passwords:", enteredPassword, this.password);
     return await bcrypt.compare(enteredPassword, this.password);
 };
 

@@ -12,6 +12,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       const res = await registerUser(data);
+      console.log({ user: res.user, token: res.token, loading: false })
       set({ user: res.user, token: res.token, loading: false });
       // success handled via state
     } catch (err: any) {
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       const res = await loginUser(data);
+      console.log({ user: res.user, token: res.token, loading: false })
       set({ user: res.user, token: res.token, loading: false });
       localStorage.setItem("token", res.token);
       return true;
@@ -71,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     try {
       await logoutUser();
-    } catch (err : any) {
+    } catch (err: any) {
       console.warn("Logout API failed, clearing local anyway:", err.message);
     } finally {
       localStorage.removeItem("token");
