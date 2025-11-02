@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
 import { Code, Copy, CheckCircle, Eye, ArrowLeft } from 'lucide-react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Project } from '@/types/index'
+// import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import type { Project } from '@/types/index'
 import { projects } from '../constant/index'
 
 const MiniProjects = () => {
-  const { isSignedIn } = useAuth()
+  const { user } = useAuthStore()
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [activeTab, setActiveTab] = useState<'html' | 'css' | 'javascript' | 'preview'>('html')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -87,11 +87,10 @@ const MiniProjects = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium transition-colors capitalize ${
-                    activeTab === tab
-                      ? 'bg-purple-500/20 text-purple-300 border-b-2 border-purple-400'
-                      : 'text-gray-400 hover:text-purple-300 hover:bg-purple-500/10'
-                  }`}
+                  className={`px-6 py-3 font-medium transition-colors capitalize ${activeTab === tab
+                    ? 'bg-purple-500/20 text-purple-300 border-b-2 border-purple-400'
+                    : 'text-gray-400 hover:text-purple-300 hover:bg-purple-500/10'
+                    }`}
                 >
                   {tab === 'javascript' ? 'JS' : tab}
                 </button>
@@ -128,10 +127,9 @@ const MiniProjects = () => {
                       </>
                     )}
                   </button>
-                  
+
                   <SyntaxHighlighter
                     language={activeTab === 'javascript' ? 'javascript' : activeTab}
-                    style={vscDarkPlus}
                     customStyle={{
                       margin: 0,
                       padding: '2rem',
@@ -159,7 +157,7 @@ const MiniProjects = () => {
               <Copy className="mr-2 w-5 h-5" />
               Copy All Code
             </button>
-            
+
             <button
               onClick={() => setSelectedProject(null)}
               className="border border-purple-500/50 text-purple-300 px-8 py-3 rounded-lg font-semibold hover:bg-purple-500/10 hover:border-purple-400 transition-all duration-300"
@@ -182,21 +180,21 @@ const MiniProjects = () => {
               <Code className="w-12 h-12 text-purple-400" />
             </div>
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
             Mini Projects
           </h1>
-          
+
           <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-            Explore beginner-friendly projects with complete source code. Each project includes 
+            Explore beginner-friendly projects with complete source code. Each project includes
             HTML, CSS, and JavaScript with live preview and copy-to-clipboard functionality.
           </p>
-          
-          {!isSignedIn && (
+
+          {!user && (
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/30 max-w-md mx-auto">
               <p className="text-purple-300 mb-4">Sign in to access mini projects</p>
               <Link
-                to="/sign-up"
+                to="/register"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
               >
                 Get Started
@@ -212,19 +210,19 @@ const MiniProjects = () => {
             <h3 className="text-lg font-bold text-white mb-2">Complete Code</h3>
             <p className="text-gray-300 text-sm">Full HTML, CSS, and JavaScript source code</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-3xl mb-3">👁️</div>
             <h3 className="text-lg font-bold text-white mb-2">Live Preview</h3>
             <p className="text-gray-300 text-sm">See projects running in real-time</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-3xl mb-3">📋</div>
             <h3 className="text-lg font-bold text-white mb-2">Easy Copy</h3>
             <p className="text-gray-300 text-sm">One-click copy to clipboard functionality</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-3xl mb-3">🎯</div>
             <h3 className="text-lg font-bold text-white mb-2">Beginner Friendly</h3>
@@ -237,11 +235,10 @@ const MiniProjects = () => {
           {projects.map((project) => (
             <button
               key={project.id}
-              onClick={() => isSignedIn && setSelectedProject(project)}
-              disabled={!isSignedIn}
-              className={`group bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 overflow-hidden transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-left ${
-                !isSignedIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-purple-400/40'
-              }`}
+              onClick={() => user && setSelectedProject(project)}
+              disabled={!user}
+              className={`group bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 overflow-hidden transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-left ${!user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-purple-400/40'
+                }`}
             >
               <div className="aspect-video overflow-hidden">
                 <img
@@ -250,7 +247,7 @@ const MiniProjects = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              
+
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xl font-semibold text-white group-hover:text-purple-300 transition-colors">
@@ -260,11 +257,11 @@ const MiniProjects = () => {
                     {project.difficulty}
                   </span>
                 </div>
-                
+
                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">
                   {project.description}
                 </p>
-                
+
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.technologies.map((tech) => (
                     <span key={tech} className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">
@@ -272,14 +269,14 @@ const MiniProjects = () => {
                     </span>
                   ))}
                 </div>
-                
+
                 <div className="flex items-center text-purple-400 text-sm font-medium">
                   <Eye className="w-4 h-4 mr-2" />
                   View Project
                 </div>
               </div>
-              
-              {!isSignedIn && (
+
+              {!user && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-purple-300 font-medium">Sign in required</span>
                 </div>
@@ -289,7 +286,7 @@ const MiniProjects = () => {
         </div>
 
         {/* Call to Action */}
-        {!isSignedIn && (
+        {!user && (
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-8 rounded-xl border border-purple-500/20 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-white mb-4">Start Building Today</h3>
@@ -298,7 +295,7 @@ const MiniProjects = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  to="/sign-up"
+                  to="/register"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                 >
                   Create Free Account

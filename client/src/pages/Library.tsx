@@ -1,23 +1,23 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
 import { BookOpen, Copy, CheckCircle, ExternalLink, ArrowLeft } from 'lucide-react'
 import { generateLibraryNotes } from '../lib/gemini'
 import { languages } from '../constant/index'
 
 const Library = () => {
-  const { isSignedIn } = useAuth()
+  const { user } = useAuthStore()
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null)
   const [notesData, setNotesData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   const handleLanguageClick = async (language: string) => {
-    if (!isSignedIn) return
-    
+    if (!user) return
+
     setIsLoading(true)
     setSelectedLanguage(language)
-    
+
     try {
       const notes = await generateLibraryNotes(language)
       setNotesData(notes)
@@ -105,7 +105,7 @@ const Library = () => {
                   <Copy className="w-6 h-6 mr-3 text-purple-400" />
                   Code Examples
                 </h2>
-                
+
                 {notesData.codeExamples.map((example: any, index: number) => (
                   <div key={index} className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 overflow-hidden">
                     <div className="p-6 border-b border-purple-500/20">
@@ -132,7 +132,7 @@ const Library = () => {
                         <p className="text-gray-300 mt-2">{example.description}</p>
                       )}
                     </div>
-                    
+
                     <div className="bg-black/40 p-6">
                       <pre className="overflow-x-auto">
                         <code className="text-green-400 text-sm whitespace-pre">
@@ -151,7 +151,7 @@ const Library = () => {
                 <ExternalLink className="w-6 h-6 mr-3 text-purple-400" />
                 Additional Learning Resources
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-4">
                 <a
                   href={getYouTubeSearchUrl(selectedLanguage)}
@@ -173,7 +173,7 @@ const Library = () => {
                     </div>
                   </div>
                 </a>
-                
+
                 <a
                   href={`https://www.google.com/search?q=${encodeURIComponent(selectedLanguage + ' programming documentation')}`}
                   target="_blank"
@@ -236,21 +236,21 @@ const Library = () => {
               <BookOpen className="w-12 h-12 text-purple-400" />
             </div>
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
             Programming Library
           </h1>
-          
+
           <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-            Access comprehensive AI-generated notes, theory explanations, and code examples 
+            Access comprehensive AI-generated notes, theory explanations, and code examples
             for popular programming languages.
           </p>
-          
-          {!isSignedIn && (
+
+          {!user && (
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/30 max-w-md mx-auto">
               <p className="text-purple-300 mb-4">Sign in to access the programming library</p>
               <Link
-                to="/sign-up"
+                to="/register"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
               >
                 Get Started
@@ -266,13 +266,13 @@ const Library = () => {
             <h3 className="text-xl font-bold text-white mb-2">Comprehensive Theory</h3>
             <p className="text-gray-300">Detailed explanations of programming concepts and principles</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-4xl mb-4">💻</div>
             <h3 className="text-xl font-bold text-white mb-2">Code Examples</h3>
             <p className="text-gray-300">Practical code samples with copy-to-clipboard functionality</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-4xl mb-4">🎥</div>
             <h3 className="text-xl font-bold text-white mb-2">Learning Resources</h3>
@@ -286,10 +286,9 @@ const Library = () => {
             <button
               key={language.name}
               onClick={() => handleLanguageClick(language.name)}
-              disabled={!isSignedIn}
-              className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
-                !isSignedIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              }`}
+              disabled={!user}
+              className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${!user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                }`}
             >
               <div className="text-center">
                 <div className="bg-white/10 w-16 h-16 rounded-lg p-3 mx-auto mb-4 group-hover:bg-white/20 transition-colors">
@@ -307,12 +306,12 @@ const Library = () => {
                   {language.name}
                 </h3>
               </div>
-              
-              {isSignedIn && (
+
+              {user && (
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/5 group-hover:to-pink-500/5 rounded-xl transition-all duration-300"></div>
               )}
-              
-              {!isSignedIn && (
+
+              {!user && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-purple-300 font-medium">Sign in required</span>
                 </div>
@@ -322,7 +321,7 @@ const Library = () => {
         </div>
 
         {/* Call to Action */}
-        {!isSignedIn && (
+        {!user && (
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-8 rounded-xl border border-purple-500/20 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-white mb-4">Unlock Your Learning Potential</h3>
@@ -331,7 +330,7 @@ const Library = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  to="/sign-up"
+                  to="/register"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                 >
                   Create Free Account

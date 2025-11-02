@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from "../store/authStore"
+
 import { Link } from 'react-router-dom'
 import { MessageCircle, Send, Bot, User, Loader2 } from 'lucide-react'
 import { GoogleGenerativeAI } from '@google/generative-ai'
@@ -12,7 +13,9 @@ interface Message {
 }
 
 const ChatBot = () => {
-  const { isSignedIn } = useAuth()
+  const { user } = useAuthStore()
+  console.log(user)
+  // const { isSignedIn } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -27,7 +30,7 @@ const ChatBot = () => {
   }, [messages])
 
   useEffect(() => {
-    if (isSignedIn && messages.length === 0) {
+    if (user && messages.length === 0) {
       // Add welcome message
       const welcomeMessage: Message = {
         id: Date.now().toString(),
@@ -37,7 +40,7 @@ const ChatBot = () => {
       }
       setMessages([welcomeMessage])
     }
-  }, [isSignedIn])
+  }, [user])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -59,7 +62,7 @@ const ChatBot = () => {
 
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-      
+
       const prompt = `You are a helpful AI programming assistant. The user asked: "${userMessage.content}". 
       Please provide a helpful, accurate, and educational response. If it's about programming, include code examples when relevant. 
       Keep responses conversational but informative. If the question is not programming-related, gently redirect to programming topics while still being helpful.`
@@ -118,7 +121,7 @@ const ChatBot = () => {
     })
   }
 
-  if (!isSignedIn) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
@@ -132,7 +135,7 @@ const ChatBot = () => {
             Please sign in to chat with our AI programming assistant.
           </p>
           <Link
-            to="/sign-up"
+            to="/register"
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
           >
             Get Started
@@ -171,36 +174,33 @@ const ChatBot = () => {
                 className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`flex items-start max-w-[90%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    message.isUser 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 ml-3' 
-                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 mr-3'
-                  }`}>
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${message.isUser
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 ml-3'
+                    : 'bg-gradient-to-r from-blue-500 to-cyan-500 mr-3'
+                    }`}>
                     {message.isUser ? (
                       <User className="w-5 h-5 text-white" />
                     ) : (
                       <Bot className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  
-                  <div className={`rounded-2xl p-4 ${
-                    message.isUser
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                      : 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-gray-100'
-                  }`}>
+
+                  <div className={`rounded-2xl p-4 ${message.isUser
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    : 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-gray-100'
+                    }`}>
                     <div className="text-sm">
                       {formatMessage(message.content)}
                     </div>
-                    <div className={`text-xs mt-2 opacity-70 ${
-                      message.isUser ? 'text-purple-100' : 'text-gray-400'
-                    }`}>
+                    <div className={`text-xs mt-2 opacity-70 ${message.isUser ? 'text-purple-100' : 'text-gray-400'
+                      }`}>
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-            
+
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
@@ -217,7 +217,7 @@ const ChatBot = () => {
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 

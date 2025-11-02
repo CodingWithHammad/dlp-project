@@ -1,4 +1,4 @@
-import { Project } from "@/types/index"
+import type { Project } from "@/types/index"
 import { Award, BookOpen, Brain, CheckCircle, ChefHatIcon, Home, Library, Mail, Map, Target, Trophy, User, Users } from "lucide-react"
 
 export const navItems = [

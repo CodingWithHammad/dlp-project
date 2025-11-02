@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { UserButton, useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Code, Menu } from 'lucide-react'
 import { navItems } from '../constant/index'
 import {
@@ -12,9 +12,7 @@ import {
 
 const Layout = () => {
   const location = useLocation()
-  const { isSignedIn } = useAuth()
-
-
+  const { user } = useAuthStore()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -37,8 +35,8 @@ const Layout = () => {
                   key={path}
                   to={path}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${location.pathname === path
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                      : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                    : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
                     }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -71,8 +69,8 @@ const Layout = () => {
                         key={path}
                         to={path}
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${location.pathname === path
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                            : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'text-gray-300 hover:text-purple-300 hover:bg-purple-500/10'
                           }`}
                       >
                         <Icon className="w-4 h-4" />
@@ -83,24 +81,22 @@ const Layout = () => {
 
                   {/* Auth Buttons inside Sheet */}
                   <div className="mt-6">
-                    {isSignedIn ? (
-                      <UserButton afterSignOutUrl="/" />
-                    ) : (
+                    {user ? (
                       <div className="flex flex-col space-y-3">
                         <Link
-                          to="/sign-in"
+                          to="/login"
                           className="text-gray-300 hover:text-purple-300 transition-colors"
                         >
                           Sign In
                         </Link>
                         <Link
-                          to="/sign-up"
+                          to="/register"
                           className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                         >
                           Sign Up
                         </Link>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </SheetContent>
               </Sheet>
@@ -108,24 +104,22 @@ const Layout = () => {
 
             {/* Right Side Buttons (Desktop) */}
             <div className="hidden md:flex items-center space-x-4">
-              {isSignedIn ? (
-                <UserButton afterSignOutUrl="/" />
-              ) : (
+              {user ? (
                 <div className="flex items-center space-x-3">
                   <Link
-                    to="/sign-in"
+                    to="/login"
                     className="text-gray-300 hover:text-purple-300 transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
-                    to="/sign-up"
+                    to="/register"
                     className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                   >
                     Sign Up
                   </Link>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
 import { Map, ChevronRight, ChevronDown, Clock, Target, CheckCircle } from 'lucide-react'
 import { generateRoadmap } from '../lib/gemini'
 import { languages } from '../constant/index'
 
 const Roadmap = () => {
-  const { isSignedIn } = useAuth()
+  const { user } = useAuthStore()
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null)
   const [roadmapData, setRoadmapData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -14,12 +14,12 @@ const Roadmap = () => {
 
 
   const handleLanguageClick = async (language: string) => {
-    if (!isSignedIn) return
-    
+    if (!user) return
+
     setIsLoading(true)
     setSelectedLanguage(language)
     setExpandedPhases(new Set([0])) // Expand first phase by default
-    
+
     try {
       const roadmap = await generateRoadmap(language)
       setRoadmapData(roadmap)
@@ -102,20 +102,20 @@ const Roadmap = () => {
             <div className="space-y-8">
               {roadmapData.phases?.map((phase: any, phaseIndex: number) => {
                 const isExpanded = expandedPhases.has(phaseIndex)
-                
+
                 return (
                   <div key={phaseIndex} className="relative">
                     {/* Connecting Line */}
                     {phaseIndex < roadmapData.phases.length - 1 && (
                       <div className="absolute left-8 top-20 w-0.5 h-12 bg-gradient-to-b from-purple-500 to-pink-500"></div>
                     )}
-                    
+
                     <div className="flex items-start">
                       {/* Phase Icon */}
                       <div className={`flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-r ${getPhaseColor(phaseIndex)} flex items-center justify-center text-2xl shadow-lg z-10`}>
                         {getPhaseIcon(phaseIndex)}
                       </div>
-                      
+
                       {/* Phase Content */}
                       <div className="flex-grow ml-6">
                         <button
@@ -137,11 +137,11 @@ const Roadmap = () => {
                                 {phase.topics?.length || 0} topics to master in this phase
                               </p>
                             </div>
-                            
+
                             <ChevronDown className={`w-6 h-6 text-purple-400 transition-transform group-hover:text-purple-300 ${isExpanded ? 'rotate-180' : ''}`} />
                           </div>
                         </button>
-                        
+
                         {/* Phase Topics */}
                         {isExpanded && (
                           <div className="mt-4 space-y-4">
@@ -153,11 +153,11 @@ const Roadmap = () => {
                                       <Target className="w-4 h-4 text-purple-400" />
                                     </div>
                                   </div>
-                                  
+
                                   <div className="flex-grow">
                                     <h4 className="text-lg font-semibold text-white mb-2">{topic.title}</h4>
                                     <p className="text-gray-300 mb-4">{topic.description}</p>
-                                    
+
                                     {topic.subtopics && topic.subtopics.length > 0 && (
                                       <div>
                                         <h5 className="text-sm font-medium text-purple-300 mb-3">Key Concepts:</h5>
@@ -223,21 +223,21 @@ const Roadmap = () => {
               <Map className="w-12 h-12 text-purple-400" />
             </div>
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
             Learning Roadmaps
           </h1>
-          
+
           <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-            Get personalized, AI-generated learning roadmaps for any programming language. 
+            Get personalized, AI-generated learning roadmaps for any programming language.
             Follow structured paths from beginner to expert level.
           </p>
-          
-          {!isSignedIn && (
+
+          {!user && (
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/30 max-w-md mx-auto">
               <p className="text-purple-300 mb-4">Sign in to access personalized roadmaps</p>
               <Link
-                to="/sign-up"
+                to="/register"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 inline-flex items-center"
               >
                 Get Started
@@ -254,13 +254,13 @@ const Roadmap = () => {
             <h3 className="text-xl font-bold text-white mb-2">Personalized Paths</h3>
             <p className="text-gray-300">AI-generated roadmaps tailored to your learning goals and current skill level</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-4xl mb-4">📚</div>
             <h3 className="text-xl font-bold text-white mb-2">Structured Learning</h3>
             <p className="text-gray-300">Step-by-step progression from beginner concepts to advanced techniques</p>
           </div>
-          
+
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 text-center">
             <div className="text-4xl mb-4">⚡</div>
             <h3 className="text-xl font-bold text-white mb-2">Real-time Updates</h3>
@@ -274,10 +274,9 @@ const Roadmap = () => {
             <button
               key={language.name}
               onClick={() => handleLanguageClick(language.name)}
-              disabled={!isSignedIn}
-              className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
-                !isSignedIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              }`}
+              disabled={!user}
+              className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${!user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                }`}
             >
               <div className="text-center">
                 <div className="bg-white/10 w-16 h-16 rounded-lg p-3 mx-auto mb-4 group-hover:bg-white/20 transition-colors">
@@ -295,12 +294,12 @@ const Roadmap = () => {
                   {language.name}
                 </h3>
               </div>
-              
-              {isSignedIn && (
+
+              {user && (
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/5 group-hover:to-pink-500/5 rounded-xl transition-all duration-300"></div>
               )}
-              
-              {!isSignedIn && (
+
+              {!user && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-purple-300 font-medium">Sign in required</span>
                 </div>
@@ -310,7 +309,7 @@ const Roadmap = () => {
         </div>
 
         {/* Call to Action */}
-        {!isSignedIn && (
+        {!user && (
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-8 rounded-xl border border-purple-500/20 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-white mb-4">Start Your Learning Journey</h3>
@@ -319,7 +318,7 @@ const Roadmap = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  to="/sign-up"
+                  to="/register"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                 >
                   Create Free Account

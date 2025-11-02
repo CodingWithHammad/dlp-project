@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
 import { Play, Award, Clock, ChevronRight } from 'lucide-react'
 import { generateQuiz } from '../lib/gemini'
@@ -7,14 +7,13 @@ import Quiz from '../components/Quiz'
 import { languages } from '../constant/index'
 
 const Courses = () => {
-  const { isSignedIn } = useAuth()
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null)
   const [quizData, setQuizData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const { user } = useAuthStore()
 
- 
   const handleLanguageClick = async (language: string) => {
-    if (!isSignedIn) return
+    if (!user) return
 
     setIsLoading(true)
     setSelectedLanguage(language)
@@ -64,11 +63,11 @@ const Courses = () => {
             Each quiz is unique and tailored to test your knowledge comprehensively.
           </p>
 
-          {!isSignedIn && (
+          {!user && (
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/30 max-w-md mx-auto">
               <p className="text-purple-300 mb-4">Ready to start learning?</p>
               <Link
-                to="/sign-up"
+                to="/register"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 inline-flex items-center"
               >
                 Sign Up Now
@@ -117,8 +116,8 @@ const Courses = () => {
               <button
                 key={language.name}
                 onClick={() => handleLanguageClick(language.name)}
-                disabled={!isSignedIn}
-                className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${!isSignedIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                disabled={!user}
+                className={`group relative bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-6 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${!user ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   }`}
               >
                 <div className="text-center">
@@ -142,11 +141,11 @@ const Courses = () => {
                   </p>
                 </div>
 
-                {isSignedIn && (
+                {user && (
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/5 group-hover:to-pink-500/5 rounded-xl transition-all duration-300"></div>
                 )}
 
-                {!isSignedIn && (
+                {!user && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-purple-300 font-medium">Sign in required</span>
                   </div>
@@ -157,7 +156,7 @@ const Courses = () => {
         )}
 
         {/* Call to Action */}
-        {!isSignedIn && !isLoading && (
+        {!user && !isLoading && (
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-8 rounded-xl border border-purple-500/20 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-white mb-4">Ready to Test Your Skills?</h3>
@@ -166,7 +165,7 @@ const Courses = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  to="/sign-up"
+                  to="/register"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
                 >
                   Start Learning Free

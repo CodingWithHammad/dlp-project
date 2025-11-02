@@ -21,3 +21,4 @@ export interface QuizScore {
   completed_at: string
   quiz_data: any
 }
+

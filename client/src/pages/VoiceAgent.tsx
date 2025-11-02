@@ -1,7 +1,7 @@
 // Trying to integrate vapi voice agent over here
 
 import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuthStore } from '@/store/authStore'
 import { Link } from 'react-router-dom'
 import { Mic, MicOff, Phone, PhoneOff, Volume2 } from 'lucide-react'
 
@@ -13,7 +13,7 @@ interface TranscriptMessage {
 }
 
 const VapiAgent = () => {
-  const { isSignedIn } = useAuth()
+  const { user } = useAuthStore()
   const [isConnected, setIsConnected] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([])
@@ -121,7 +121,7 @@ const VapiAgent = () => {
     }
   }
 
-  if (!isSignedIn) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
@@ -135,7 +135,7 @@ const VapiAgent = () => {
             Please sign in to access the AI voice assistant.
           </p>
           <Link
-            to="/sign-up"
+            to="/register"
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
           >
             Get Started

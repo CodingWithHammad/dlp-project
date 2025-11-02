@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '@clerk/clerk-react'
 import { CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Clock } from 'lucide-react'
-import { supabase, QuizScore } from '../lib/supabase'
 
 interface QuizProps {
   language: string
@@ -10,7 +8,6 @@ interface QuizProps {
 }
 
 const Quiz: React.FC<QuizProps> = ({ language, quizData, onComplete }) => {
-  const { user } = useAuth()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -52,40 +49,40 @@ const Quiz: React.FC<QuizProps> = ({ language, quizData, onComplete }) => {
   const handleFinishQuiz = async () => {
     setShowResults(true)
     
-    const score = selectedAnswers.reduce((acc, answer, index) => {
-      return acc + (answer === questions[index]?.correctAnswer ? 1 : 0)
-    }, 0)
+    // const score = selectedAnswers.reduce((acc, answer, index) => {
+    //   return acc + (answer === questions[index]?.correctAnswer ? 1 : 0)
+    // }, 0)
 
-    // Save quiz results to database
-    if (user) {
-      try {
-        const quizScore: QuizScore = {
-          user_id: user.id,
-          user_email: user.primaryEmailAddress?.emailAddress || '',
-          programming_language: language,
-          score,
-          total_questions: totalQuestions,
-          completed_at: new Date().toISOString(),
-          quiz_data: {
-            questions: questions.map((q: any, index: number) => ({
-              ...q,
-              userAnswer: selectedAnswers[index],
-              isCorrect: selectedAnswers[index] === q.correctAnswer
-            }))
-          }
-        }
+    // // Save quiz results to database
+    // if (user) {
+    //   try {
+    //     const quizScore: QuizScore = {
+    //       user_id: user.id,
+    //       user_email: user.primaryEmailAddress?.emailAddress || '',
+    //       programming_language: language,
+    //       score,
+    //       total_questions: totalQuestions,
+    //       completed_at: new Date().toISOString(),
+    //       quiz_data: {
+    //         questions: questions.map((q: any, index: number) => ({
+    //           ...q,
+    //           userAnswer: selectedAnswers[index],
+    //           isCorrect: selectedAnswers[index] === q.correctAnswer
+    //         }))
+    //       }
+    //     }
 
-        const { error } = await supabase
-          .from('quiz_scores')
-          .insert([quizScore])
+    //     const { error } = await supabase
+    //       .from('quiz_scores')
+    //       .insert([quizScore])
 
-        if (error) {
-          console.error('Error saving quiz score:', error)
-        }
-      } catch (error) {
-        console.error('Error saving quiz score:', error)
-      }
-    }
+    //     if (error) {
+    //       console.error('Error saving quiz score:', error)
+    //     }
+    //   } catch (error) {
+    //     console.error('Error saving quiz score:', error)
+    //   }
+    // }
   }
 
   const formatTime = (seconds: number) => {
