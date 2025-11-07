@@ -28,7 +28,6 @@ app.get("/", (_, res) => {
 
 // ✅ Routes
 app.use("/api/auth", authRoutes);
-
 // ✅ DB + Server
 connectDB();
 const PORT = process.env.PORT || 5000;
