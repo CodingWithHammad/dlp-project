@@ -25,7 +25,6 @@ app.use(
 app.get("/", (_, res) => {
   res.send("Server is running correctly...");
 });
-
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 // ✅ DB + Server
