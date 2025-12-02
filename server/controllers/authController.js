@@ -87,7 +87,6 @@ export const register = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
     try {
 
@@ -117,6 +116,7 @@ export const login = async (req, res) => {
         })
     }
 }
+
 
 export const forgetPassword = async (req, res) => {
     try {
