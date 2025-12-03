@@ -118,6 +118,7 @@ export const login = async (req, res) => {
 }
 
 
+
 export const forgetPassword = async (req, res) => {
     try {
 
@@ -155,6 +156,7 @@ export const forgetPassword = async (req, res) => {
         })
     }
 }
+
 
 export const resetPassword = async (req, res) => {
     try {
