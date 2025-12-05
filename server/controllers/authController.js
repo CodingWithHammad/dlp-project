@@ -157,6 +157,7 @@ export const forgetPassword = async (req, res) => {
     }
 }
 
+
 export const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
@@ -199,7 +200,6 @@ export const resetPassword = async (req, res) => {
         });
     }
 };
-
 
 export const logout = async (req, res) => {
     try {
