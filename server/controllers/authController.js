@@ -201,6 +201,7 @@ export const resetPassword = async (req, res) => {
     }
 };
 
+
 export const logout = async (req, res) => {
     try {
         res.clearCookie("token", {
