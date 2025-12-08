@@ -177,11 +177,13 @@ export const resetPassword = async (req, res) => {
         if (user.otpExpiry < new Date()) {
             return res.status(400).json({ message: "OTP expired." });
         }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
         user.otp = null;
         user.otpExpiry = null;
+
 
         await user.save();
 
@@ -200,7 +202,6 @@ export const resetPassword = async (req, res) => {
         });
     }
 };
-
 
 export const logout = async (req, res) => {
     try {
