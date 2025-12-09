@@ -184,7 +184,6 @@ export const resetPassword = async (req, res) => {
         user.otp = null;
         user.otpExpiry = null;
 
-
         await user.save();
 
         console.log(`✅ Password reset successful for ${user.email}`);
@@ -202,6 +201,7 @@ export const resetPassword = async (req, res) => {
         });
     }
 };
+
 
 export const logout = async (req, res) => {
     try {
