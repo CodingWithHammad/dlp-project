@@ -157,7 +157,6 @@ export const forgetPassword = async (req, res) => {
     }
 }
 
-
 export const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
@@ -179,6 +178,7 @@ export const resetPassword = async (req, res) => {
         }
         
         
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
