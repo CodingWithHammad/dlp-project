@@ -8,7 +8,6 @@ import fs from "fs";
 
 dotenv.config()
 
-
 const transporter = nodemailer.createTransport(
     {
         auth: {
@@ -157,7 +156,6 @@ export const forgetPassword = async (req, res) => {
     }
 }
 
-
 export const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
@@ -179,7 +177,6 @@ export const resetPassword = async (req, res) => {
         }
         
         
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
@@ -205,6 +202,7 @@ export const resetPassword = async (req, res) => {
 };
 
 
+
 export const logout = async (req, res) => {
     try {
         res.clearCookie("token", {
@@ -226,4 +224,5 @@ export const logout = async (req, res) => {
             error: error.message,
         });
     }
+
 };
