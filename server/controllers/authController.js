@@ -6,7 +6,9 @@ import dotenv from "dotenv"
 import cloudinary from "../config/cloudnary.js"
 import fs from "fs";
 
+
 dotenv.config()
+
 
 const transporter = nodemailer.createTransport(
     {
@@ -115,7 +117,6 @@ export const login = async (req, res) => {
         })
     }
 }
-
 
 
 export const forgetPassword = async (req, res) => {

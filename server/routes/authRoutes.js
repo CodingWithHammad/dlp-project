@@ -10,4 +10,5 @@ router.post("/forgetPassword", forgetPassword)
 router.post("/resetPassword", resetPassword)
 router.post("/logout", logout)
 
+
 export default router;
