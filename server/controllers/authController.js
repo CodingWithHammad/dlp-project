@@ -109,6 +109,7 @@ export const login = async (req, res) => {
             user
         })
 
+        
     } catch (error) {
         console.log("Error present inside the login controller : " + error);
         res.status(500).json({
