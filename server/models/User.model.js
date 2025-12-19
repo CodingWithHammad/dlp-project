@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 
+
 const UserSchema = new Schema(
     {
         name: {
@@ -50,7 +51,6 @@ UserSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
-
 
 // ✅ Compare entered password with stored one
 UserSchema.methods.matchPassword = async function (enteredPassword) {
