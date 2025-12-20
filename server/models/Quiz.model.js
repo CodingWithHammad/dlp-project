@@ -52,11 +52,7 @@ UserSchema.pre("save", async function (next) {
     next();
 });
 
-// ✅ Compare entered password with stored one
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-    console.log("Comparing passwords:", enteredPassword, this.password);
-    return await bcrypt.compare(enteredPassword, this.password);
-};
+
 
 export const User = mongoose.model("User", UserSchema);
 // by hk
